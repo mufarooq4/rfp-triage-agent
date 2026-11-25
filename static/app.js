@@ -50,7 +50,9 @@
   }
 
   // ------------------------------------------------------------------ health
+  let maxMb = 25;
   fetch("/api/health").then((r) => r.json()).then((h) => {
+    if (h.max_upload_mb) { maxMb = h.max_upload_mb; const sub = document.querySelector(".dz-sub"); if (sub) sub.textContent = `or click to choose a file · max ${maxMb} MB`; }
     const el = $("#health");
     el.classList.add(h.llm_configured ? "ok" : "bad");
     el.title = h.llm_configured ? `Ready · models: ${h.models.join(", ")}` : "Server has no GEMINI_API_KEY set";
@@ -97,7 +99,7 @@
   async function analyse(file) {
     $("#uploadError").hidden = true;
     if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") return fail("Please choose a PDF file.");
-    if (file.size > 25 * 1024 * 1024) return fail("That file is larger than 25 MB.");
+    if (file.size > maxMb * 1024 * 1024) return fail(`That file is larger than ${maxMb} MB, the upload limit of this free deployment. Run the app locally for bigger files.`);
     show("progressView"); startProgress(file.name);
     const fd = new FormData(); fd.append("file", file);
     try {

@@ -25,7 +25,8 @@ from .profile import IDIAZ_PROFILE
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
-MAX_MB = float(os.getenv("MAX_UPLOAD_MB", "25"))
+# Vercel caps request bodies at 4.5 MB; elsewhere allow up to 25 MB.
+MAX_MB = float(os.getenv("MAX_UPLOAD_MB", "4.5" if os.getenv("VERCEL") else "25"))
 STATIC = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(
@@ -43,6 +44,7 @@ def health():
         "llm_configured": agent.client.configured,
         "models": agent.client.models,
         "last_model_used": agent.client.last_model,
+        "max_upload_mb": MAX_MB,
     }
 
 

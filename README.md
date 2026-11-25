@@ -2,7 +2,7 @@
 
 Upload a government RFP as a PDF and get a bid / no-bid call in under a minute. Every fact, date and requirement in the report links to the PDF page it came from, and the app checks each quote against the document before showing it.
 
-**Live demo:** `<YOUR-RENDER-URL>` &nbsp;·&nbsp; **API docs:** `<YOUR-RENDER-URL>/docs`
+**Live demo:** `<YOUR-VERCEL-URL>` &nbsp;·&nbsp; **API docs:** `<YOUR-VERCEL-URL>/docs`
 
 Built by Muhammad Umar Farooq for the idiaz.io AI & Product Internship Challenge 2026.
 
@@ -92,14 +92,15 @@ The first prototype took 73 s on Sample 1 because the model's "thinking" was lef
 
 Model names come from `GEMINI_MODELS`, an ordered list. When Gemini is busy (503/429) or the network drops, the call is retried once after 2 s, then the next model is tried (lighter "lite" models come early because they run on separate capacity). A hung call is abandoned after 60 s and the whole attempt after 80 s, so the user gets a clear "try again" message instead of a long wait. A retired model (404) is skipped at once. During testing Google returned 503 "high demand" for every model, which is why this exists.
 
-### Why Render
+### Why Vercel
 
-One Docker container: FastAPI serves both the API and a static UI, deployed on Render's free web-service tier.
+The whole app (FastAPI serving both the API and a static UI) is deployed on Vercel's free Hobby plan.
 
-* **Free with no card**, and listed in the brief. I first planned Hugging Face Spaces, but Docker Spaces now need a paid plan.
-* **Docker runtime**: the same `Dockerfile` runs locally and in production. `render.yaml` is the Blueprint (service type, free plan, health check, and the API key as a dashboard secret).
-* **No short request timeout**, so a 30–50 second model call isn't cut off (serverless hobby tiers can be).
-* **The catch, and the fix:** free services sleep after 15 minutes without traffic and take about a minute to wake, which would eat the one-minute budget. `.github/workflows/keep-warm.yml` is a free scheduled GitHub Action that pings `/api/health` every 10 minutes, so the app stays awake. One always-on service fits inside Render's 750 free hours a month.
+* **Free with no card**, and listed in the brief. I tried Hugging Face Spaces first, but Docker Spaces now need a paid plan. Render asked for a card to verify identity, which the brief rules out.
+* **Zero configuration for FastAPI**: Vercel finds the `app` object in `app/main.py` and runs it as a single serverless function. `vercel.json` raises the function's time limit to 300 s, so a 30–50 s model call is never cut off.
+* **No sleeping server**: unlike free container hosts that sleep after 15 minutes and take about a minute to wake, a serverless function starts in seconds.
+* **Trade-offs:** Vercel caps uploads at 4.5 MB. A 100-page text PDF is usually well under that (the samples are 175 KB and 138 KB), and the UI says so if a file is too big. PyMuPDF is pinned to 1.x because 2.x pulls in a large ML runtime we don't use, which would bloat the function.
+* The same code also runs anywhere Docker runs (`Dockerfile`, `render.yaml`) or locally with `uvicorn`.
 
 ---
 
@@ -156,16 +157,17 @@ They cover PDF reading, strike-through detection, every verification status (inc
 
 ### API
 ```bash
-curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://<YOUR-RENDER-URL>/api/triage
+curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://<YOUR-VERCEL-URL>/api/triage
 ```
 
 ## Deploy (free)
 
 1. Push this repo to GitHub.
-2. render.com → sign in with GitHub (no card) → **New → Blueprint** → pick the repo. Render reads `render.yaml`.
-3. Enter `GEMINI_API_KEY` when asked → **Apply**. The first build takes a few minutes.
-4. Open `https://<service-name>.onrender.com`.
-5. Keep it awake: in the GitHub repo, **Settings → Secrets and variables → Actions → Variables** → add `APP_URL` = your Render URL. The `keep-warm` workflow then pings it every 10 minutes.
+2. vercel.com → sign up with GitHub (Hobby plan, no card) → **Add New → Project** → import the repo.
+3. Under **Environment Variables**, add `GEMINI_API_KEY` → **Deploy**.
+4. Open `https://<project>.vercel.app`.
+
+Locally: `uvicorn app.main:app --port 7860`. With Docker: `docker build -t rfp . && docker run -p 7860:7860 -e GEMINI_API_KEY=... rfp`.
 
 ---
 

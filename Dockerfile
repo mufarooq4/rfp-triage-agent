@@ -16,5 +16,5 @@ COPY --chown=appuser static ./static
 USER appuser
 
 EXPOSE 7860
-# Render sets $PORT; 7860 is the local default
+# hosts that set $PORT (e.g. Render) use it; 7860 is the local default
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
