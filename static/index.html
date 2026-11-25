@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RFP Triage Agent</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111827'/><path d='M9 17l4.5 4.5L23 11' stroke='%2334d399' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">✓</span>
+      <div>
+        <div class="brand-name">RFP Triage Agent</div>
+        <div class="brand-sub">Drop in an RFP · get a source-checked bid decision</div>
+      </div>
+    </div>
+    <nav class="top-links">
+      <button class="link-btn" id="profileBtn" type="button">idiaz.io profile</button>
+      <a class="link-btn" href="/docs" target="_blank" rel="noopener">API docs</a>
+      <span id="health" class="health" title="Server status">●</span>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <!-- Triage board (bonus): every RFP analysed in this browser, ranked -->
+    <aside class="board" aria-label="Triage board">
+      <div class="board-head">
+        <h2>Triage board</h2>
+        <button id="clearBoard" class="tiny-btn" type="button" title="Clear the board">Clear</button>
+      </div>
+      <p class="board-hint">Every RFP you analyse, ranked by fit. Click one to reopen it.</p>
+      <ol id="boardList" class="board-list"></ol>
+      <button id="newBtn" class="ghost-btn full" type="button">+ Analyse another RFP</button>
+    </aside>
+
+    <main id="main">
+      <!-- Upload -->
+      <section id="uploadView" class="card upload-card">
+        <h1>Should we bid?</h1>
+        <p class="lead">Upload a text-based RFP PDF (up to ~100 pages). The agent reads every page, pulls out the
+          facts and dates, checks the must-haves, scores fit against the idiaz.io profile and makes the call —
+          with every claim linked to the page it came from.</p>
+        <label id="dropzone" class="dropzone" for="fileInput">
+          <input id="fileInput" type="file" accept="application/pdf,.pdf" hidden />
+          <div class="dz-icon" aria-hidden="true">⇪</div>
+          <div class="dz-title">Drop an RFP PDF here</div>
+          <div class="dz-sub">or click to choose a file · max 25 MB</div>
+        </label>
+        <div id="uploadError" class="error" hidden></div>
+      </section>
+
+      <!-- Progress -->
+      <section id="progressView" class="card progress-card" hidden>
+        <div class="progress-title">Analysing <span id="progressFile"></span></div>
+        <ol class="steps" id="steps">
+          <li data-step="0">Reading every page (and spotting crossed-out text)</li>
+          <li data-step="1">Gemini reads the RFP: facts, dates, requirements, ratings</li>
+          <li data-step="2">Checking each quote against the PDF</li>
+          <li data-step="3">Scoring fit against the idiaz.io profile</li>
+          <li data-step="4">Making the call</li>
+        </ol>
+        <div class="elapsed"><span id="elapsed">0</span> s elapsed</div>
+      </section>
+
+      <!-- Report -->
+      <section id="reportView" hidden></section>
+    </main>
+  </div>
+
+  <!-- Evidence drawer (bonus): shows the source page with the quote highlighted -->
+  <div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
+  <aside id="drawer" class="drawer" aria-hidden="true" aria-label="Source evidence">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-kicker">Source evidence</div>
+        <div id="drawerTitle" class="drawer-title"></div>
+      </div>
+      <button id="drawerClose" class="tiny-btn" type="button" aria-label="Close">✕</button>
+    </div>
+    <div id="drawerStatus" class="drawer-status"></div>
+    <blockquote id="drawerQuote" class="drawer-quote"></blockquote>
+    <div class="drawer-page-label" id="drawerPageLabel"></div>
+    <pre id="drawerPage" class="drawer-page"></pre>
+  </aside>
+
+  <dialog id="profileDialog" class="dialog">
+    <h3>What the agent judges fit against</h3>
+    <div id="profileBody"></div>
+    <form method="dialog"><button class="primary-btn">Close</button></form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
