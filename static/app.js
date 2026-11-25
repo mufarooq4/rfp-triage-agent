@@ -58,6 +58,20 @@
     el.title = h.llm_configured ? `Ready · models: ${h.models.join(", ")}` : "Server has no GEMINI_API_KEY set";
   }).catch(() => $("#health").classList.add("bad"));
 
+  // ------------------------------------------------------------------ theme (dark by default)
+  const themeBtn = $("#themeBtn");
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === "dark" ? "☀ Light" : "☾ Dark";
+    themeBtn.title = `Switch to ${t === "dark" ? "light" : "dark"} mode`;
+  }
+  applyTheme(document.documentElement.dataset.theme || "dark");
+  themeBtn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem("rfp-theme", next); } catch { /* storage blocked: still switches */ }
+  });
+
   // ------------------------------------------------------------------ profile
   $("#profileBtn").addEventListener("click", async () => {
     const p = await fetch("/api/profile").then((r) => r.json());
@@ -158,7 +172,7 @@
     const r = 46, c = 2 * Math.PI * r, pct = Math.max(0, Math.min(10, score)) / 10;
     const color = score >= 6 ? "var(--bid)" : score >= 4 ? "var(--warn)" : "var(--nobid)";
     return `<div class="ring"><svg width="112" height="112" viewBox="0 0 112 112">
-      <circle cx="56" cy="56" r="${r}" fill="none" stroke="#eef0f3" stroke-width="10"/>
+      <circle cx="56" cy="56" r="${r}" fill="none" stroke="var(--track)" stroke-width="10"/>
       <circle cx="56" cy="56" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
         stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct)}"/></svg>
       <div class="ring-label"><div><div class="ring-score">${sc(score)}</div><div class="ring-sub">fit / 10</div></div></div></div>`;
@@ -345,7 +359,7 @@
 
   function factorRow(fc) {
     const share = fc.weight ? fc.points / fc.weight : 0;
-    const color = share >= 0.75 ? "var(--bid)" : share >= 0.5 ? "#9ca3af" : share > 0 ? "var(--warn)" : "var(--nobid)";
+    const color = share >= 0.75 ? "var(--bid)" : share >= 0.5 ? "var(--neutral-bar)" : share > 0 ? "var(--warn)" : "var(--nobid)";
     return `<div class="factor">
       <div><div class="factor-name">${esc(fc.label)}</div><div class="factor-rating">${esc(human(fc.rating))} · weight ${esc(fc.weight)}</div></div>
       <div><div class="bar"><span style="width:${Math.max(3, share * 100)}%;background:${color}"></span></div>

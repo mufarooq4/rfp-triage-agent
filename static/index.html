@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RFP Triage Agent</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23111827'/><path d='M9 17l4.5 4.5L23 11' stroke='%2334d399' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
   <link rel="stylesheet" href="/static/styles.css" />
+  <!-- dark is the default; a saved choice is applied before the page paints -->
+  <script>try { const t = localStorage.getItem("rfp-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
   <header class="topbar">
@@ -17,6 +19,7 @@
       </div>
     </div>
     <nav class="top-links">
+      <button class="link-btn theme-btn" id="themeBtn" type="button">☀ Light</button>
       <button class="link-btn" id="profileBtn" type="button">idiaz.io profile</button>
       <a class="link-btn" href="/docs" target="_blank" rel="noopener">API docs</a>
       <span id="health" class="health" title="Server status">●</span>
