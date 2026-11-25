@@ -1,18 +1,8 @@
----
-title: RFP Triage Agent
-emoji: ✅
-colorFrom: gray
-colorTo: green
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # RFP Triage Agent
 
 Upload a government RFP as a PDF and get a bid / no-bid call in under a minute. Every fact, date and requirement in the report links to the PDF page it came from, and the app checks each quote against the document before showing it.
 
-**Live demo:** `<YOUR-SPACE-URL>` &nbsp;·&nbsp; **API docs:** `<YOUR-SPACE-URL>/docs`
+**Live demo:** `<YOUR-RENDER-URL>` &nbsp;·&nbsp; **API docs:** `<YOUR-RENDER-URL>/docs`
 
 Built by Muhammad Umar Farooq for the idiaz.io AI & Product Internship Challenge 2026.
 
@@ -102,15 +92,14 @@ The first prototype took 73 s on Sample 1 because the model's "thinking" was lef
 
 Model names come from `GEMINI_MODELS`, an ordered list. When Gemini is busy (503/429) or the network drops, the call is retried once after 2 s, then the next model is tried (lighter "lite" models come early because they run on separate capacity). A hung call is abandoned after 60 s and the whole attempt after 80 s, so the user gets a clear "try again" message instead of a long wait. A retired model (404) is skipped at once. During testing Google returned 503 "high demand" for every model, which is why this exists.
 
-### Why Hugging Face Spaces
+### Why Render
 
-One Docker container: FastAPI serves both the API and a static UI.
+One Docker container: FastAPI serves both the API and a static UI, deployed on Render's free web-service tier.
 
-* Free Spaces stay awake for 48 hours after the last visit. Render's free tier sleeps after 15 minutes and takes about 50 seconds to wake, which would eat most of the one-minute budget.
-* No short request timeout to cut off a 30–40 second model call.
-* The API key lives in Space Secrets, never in the repo.
-
-`render.yaml` is a fallback; the same Dockerfile runs there too.
+* **Free with no card**, and listed in the brief. I first planned Hugging Face Spaces, but Docker Spaces now need a paid plan.
+* **Docker runtime**: the same `Dockerfile` runs locally and in production. `render.yaml` is the Blueprint (service type, free plan, health check, and the API key as a dashboard secret).
+* **No short request timeout**, so a 30–50 second model call isn't cut off (serverless hobby tiers can be).
+* **The catch, and the fix:** free services sleep after 15 minutes without traffic and take about a minute to wake, which would eat the one-minute budget. `.github/workflows/keep-warm.yml` is a free scheduled GitHub Action that pings `/api/health` every 10 minutes, so the app stays awake. One always-on service fits inside Render's 750 free hours a month.
 
 ---
 
@@ -167,17 +156,16 @@ They cover PDF reading, strike-through detection, every verification status (inc
 
 ### API
 ```bash
-curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://<YOUR-SPACE-URL>/api/triage
+curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://<YOUR-RENDER-URL>/api/triage
 ```
 
 ## Deploy (free)
 
-1. huggingface.co/new-space → SDK **Docker** → blank.
-2. Space **Settings → Variables and secrets** → add the secret `GEMINI_API_KEY` (and optionally the variable `GEMINI_MODELS`).
-3. `git remote add space https://huggingface.co/spaces/<user>/<space>` then `git push space main`.
-4. Open `https://<user>-<space>.hf.space` once the build finishes.
-
-The YAML block at the top of this README is the Space configuration.
+1. Push this repo to GitHub.
+2. render.com → sign in with GitHub (no card) → **New → Blueprint** → pick the repo. Render reads `render.yaml`.
+3. Enter `GEMINI_API_KEY` when asked → **Apply**. The first build takes a few minutes.
+4. Open `https://<service-name>.onrender.com`.
+5. Keep it awake: in the GitHub repo, **Settings → Secrets and variables → Actions → Variables** → add `APP_URL` = your Render URL. The `keep-warm` workflow then pings it every 10 minutes.
 
 ---
 

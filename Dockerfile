@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=7860
 
-# Hugging Face Spaces runs containers as uid 1000
+# run as a non-root user
 RUN useradd -m -u 1000 appuser
 WORKDIR /home/appuser/app
 
@@ -16,5 +16,5 @@ COPY --chown=appuser static ./static
 USER appuser
 
 EXPOSE 7860
-# $PORT is set by Render/Railway; Hugging Face uses 7860
+# Render sets $PORT; 7860 is the local default
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
