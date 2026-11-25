@@ -2,7 +2,7 @@
 
 Upload a government RFP as a PDF and get a bid / no-bid call in under a minute. Every fact, date and requirement in the report links to the PDF page it came from, and the app checks each quote against the document before showing it.
 
-**Live demo:** `<YOUR-VERCEL-URL>` &nbsp;·&nbsp; **API docs:** `<YOUR-VERCEL-URL>/docs`
+**Live demo:** https://rfp-triage-agent-six.vercel.app &nbsp;·&nbsp; **API docs:** https://rfp-triage-agent-six.vercel.app/docs &nbsp;·&nbsp; **Repo:** https://github.com/mufarooq4/rfp-triage-agent
 
 Built by Muhammad Umar Farooq for the idiaz.io AI & Product Internship Challenge 2026.
 
@@ -13,7 +13,7 @@ Built by Muhammad Umar Farooq for the idiaz.io AI & Product Internship Challenge
 | RFP | Decision | Fit | Time | Quotes verified | Notes |
 |---|---|---|---|---|---|
 | Sample 1: Port Alder permit automation | **BID** | **7.2** | **47 s** | **38/39** | Proposal due 15 Jan 2027, 3:00 PM Pacific: the struck-out 8 Jan date was detected and ignored. Main risks flagged: 24/7 Severity 1 on-call, $420k cap covering build plus 2 years of hosting and AI fees, UAT termination clause. The one unverified quote joined two separate sentences, and the checker caught it. |
-| Sample 2: Larkspur County janitorial | `<NO-BID>` | `<x.x>` | `<s>` | `<n/m>` | Fast no-bid: janitorial work. |
+| Sample 2: Larkspur County janitorial | **NO-BID** | **1.0** | **29 s** | **35/35** | Fast no-bid: janitorial and custodial work is outside idiaz.io's services. Due 15 Dec 2026, 2:00 PM Eastern; mandatory site walk 3 Dec flagged. |
 
 ---
 
@@ -157,7 +157,7 @@ They cover PDF reading, strike-through detection, every verification status (inc
 
 ### API
 ```bash
-curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://<YOUR-VERCEL-URL>/api/triage
+curl -F "file=@Sample-RFP-1-Port-Alder-Permit-Automation.pdf" https://rfp-triage-agent-six.vercel.app/api/triage
 ```
 
 ## Deploy (free)
